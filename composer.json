@@ -1,0 +1,9 @@
+{
+    "name": "lcbrq/openmage-security",
+    "license": ["proprietary"],
+    "type": "magento-module",
+    "description": "Spam prevention for POST requests",
+    "extra": {
+        "magento-root-dir": "test/"
+    }
+}
