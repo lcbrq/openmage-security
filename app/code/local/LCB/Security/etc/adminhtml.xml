@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <security_rules module="lcb_security" translate="title">
+                    <title>Security Rules</title>
+                    <sort_order>999</sort_order>
+                    <action>lcb_security/rule/index</action>
+                </security_rules>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <security_rules module="lcb_security" translate="title">
+                                <title>Security Rules</title>
+                            </security_rules>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

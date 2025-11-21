@@ -14,54 +14,113 @@ class LCB_Security_Model_Observer
             return;
         }
 
-        $ip = Mage::helper('core/http')->getRemoteAddr();
-        $uri = $request->getRequestUri();
+        $ip  = Mage::helper('core/http')->getRemoteAddr();
+        $uri = $request->getPathInfo();
 
-        Mage::helper('lcb_security')->log(sprintf('LCB_Security checkPostFlood: POST from %s to %s', $ip, $uri));
+        /** @var LCB_Security_Model_Rule $rule */
+        $rule = Mage::getModel('lcb_security/rule')->load($uri, 'url');
 
-        $postRequest = Mage::getModel('lcb_security/post_request')->load($ip, 'source_ip');
+        if (!$rule->getId()) {
+            Mage::helper('lcb_security')->log(
+                sprintf('LCB_Security: no rule for URL %s, skipping', $uri)
+            );
+            return;
+        }
 
-        $dateModel   = Mage::getSingleton('core/date');
+        // RULE CHECK
+        $maxRequestsInWindow = (int) $rule->getRequestsPerHour();
+        if ($maxRequestsInWindow <= 0) {
+            Mage::helper('lcb_security')->log(
+                sprintf('LCB_Security: rule for %s has non-positive limit (%d), skipping', $uri, $maxRequestsInWindow)
+            );
+            return;
+        }
+
+        Mage::helper('lcb_security')->log(
+            sprintf(
+                'LCB_Security checkPostFlood: POST from %s to %s (limit %d req/h)',
+                $ip,
+                $uri,
+                $maxRequestsInWindow
+            )
+        );
+
+        /** @var LCB_Security_Model_Post_Request $postRequest */
+        $postRequest = Mage::getModel('lcb_security/post_request')
+            ->getCollection()
+            ->addFieldToFilter('source_ip', $ip)
+            ->addFieldToFilter('url', $uri)
+            ->getFirstItem();
+
+        /** @var Mage_Core_Model_Date $dateModel */
+        $dateModel  = Mage::getSingleton('core/date');
         $nowTime    = $dateModel->gmtTimestamp();
         $nowString  = $dateModel->gmtDate('Y-m-d H:i:s');
 
-        $blockWindowSeconds = 10 * 60;
+        // BLOCK PER HOUR
+        $blockWindowSeconds = 60 * 60;
 
         if (!$postRequest->getId()) {
             $postRequest
                 ->setSourceIp($ip)
+                ->setUrl($uri)
                 ->setRequestsCount(1)
                 ->setUpdatedAt($nowString)
                 ->save();
 
-            Mage::helper('lcb_security')->log(sprintf('LCB_Security NEW: IP %s, count=1', $ip));
+            Mage::helper('lcb_security')->log(
+                sprintf('LCB_Security NEW: IP %s, URL %s, count=1', $ip, $uri)
+            );
             return;
         }
 
         $lastUpdated     = $postRequest->getUpdatedAt();
         $lastUpdatedTime = $lastUpdated ? strtotime($lastUpdated) : 0;
-        $diff        = $nowTime - $lastUpdatedTime;
+        $diff            = $nowTime - $lastUpdatedTime;
 
-        if ($diff < $blockWindowSeconds) {
-            $currentCount = (int) $postRequest->getRequestsCount();
-            $newCount     = $currentCount + 1;
-
+        if ($diff >= $blockWindowSeconds) {
             $postRequest
-                ->setRequestsCount($newCount)
+                ->setUrl($uri)
+                ->setRequestsCount(1)
                 ->setUpdatedAt($nowString)
                 ->save();
 
-            Mage::helper('lcb_security')->log(sprintf(
-                'LCB_Security BLOCK: IP %s, count=%d, lastUpdated=%s, diff=%ds',
-                $ip,
-                $newCount,
-                $lastUpdated,
-                $diff
-            ));
+            Mage::helper('lcb_security')->log(
+                sprintf(
+                    'LCB_Security RESET: IP %s, URL %s, lastUpdated=%s, diff=%ds',
+                    $ip,
+                    $uri,
+                    $lastUpdated,
+                    $diff
+                )
+            );
+            return;
+        }
+
+        $currentCount = (int) $postRequest->getRequestsCount();
+        $newCount     = $currentCount + 1;
+
+        $postRequest
+            ->setRequestsCount($newCount)
+            ->setUpdatedAt($nowString)
+            ->save();
+
+        if ($newCount > $maxRequestsInWindow) {
+            Mage::helper('lcb_security')->log(
+                sprintf(
+                    'LCB_Security BLOCK: IP %s, URL %s, count=%d (limit %d), lastUpdated=%s, diff=%ds',
+                    $ip,
+                    $uri,
+                    $newCount,
+                    $maxRequestsInWindow,
+                    $lastUpdated,
+                    $diff
+                )
+            );
 
             Mage::getSingleton('core/session')->addError(
                 Mage::helper('core')->__(
-                    'Too many requests from your IP. Please try again, after 10 minutes.'
+                    'Too many requests from your IP. Please try again, after some time.'
                 )
             );
 
@@ -71,7 +130,6 @@ class LCB_Security_Model_Observer
             }
 
             $action->getResponse()->setRedirect($referer);
-
             $action->setFlag(
                 '',
                 Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH,
@@ -81,16 +139,13 @@ class LCB_Security_Model_Observer
             return;
         }
 
-        $postRequest
-            ->setRequestsCount(1)
-            ->setUpdatedAt($nowString)
-            ->save();
-
-
         Mage::helper('lcb_security')->log(
             sprintf(
-                'LCB_Security RESET: IP %s, lastUpdated=%s, diff=%ds',
+                'LCB_Security ALLOW: IP %s, URL %s, count=%d/%d, lastUpdated=%s, diff=%ds',
                 $ip,
+                $uri,
+                $newCount,
+                $maxRequestsInWindow,
                 $lastUpdated,
                 $diff
             )
