@@ -15,32 +15,61 @@ class LCB_Security_Model_Observer
         }
 
         $ip  = Mage::helper('core/http')->getRemoteAddr();
-        $uri = $request->getRequestUri();
+        $uri = $request->getPathInfo();
+
+        /** @var LCB_Security_Model_Rule $rule */
+        $rule = Mage::getModel('lcb_security/rule')->load($uri, 'url');
+
+        if (!$rule->getId()) {
+            Mage::helper('lcb_security')->log(
+                sprintf('LCB_Security: no rule for URL %s, skipping', $uri)
+            );
+            return;
+        }
+
+        // RULE CHECK
+        $maxRequestsInWindow = (int) $rule->getRequestsPerHour();
+        if ($maxRequestsInWindow <= 0) {
+            Mage::helper('lcb_security')->log(
+                sprintf('LCB_Security: rule for %s has non-positive limit (%d), skipping', $uri, $maxRequestsInWindow)
+            );
+            return;
+        }
 
         Mage::helper('lcb_security')->log(
-            sprintf('LCB_Security checkPostFlood: POST from %s to %s', $ip, $uri)
+            sprintf(
+                'LCB_Security checkPostFlood: POST from %s to %s (limit %d req/h)',
+                $ip,
+                $uri,
+                $maxRequestsInWindow
+            )
         );
 
         /** @var LCB_Security_Model_Post_Request $postRequest */
-        $postRequest = Mage::getModel('lcb_security/post_request')->load($ip, 'source_ip');
+        $postRequest = Mage::getModel('lcb_security/post_request')
+            ->getCollection()
+            ->addFieldToFilter('source_ip', $ip)
+            ->addFieldToFilter('url', $uri)
+            ->getFirstItem();
 
         /** @var Mage_Core_Model_Date $dateModel */
         $dateModel  = Mage::getSingleton('core/date');
         $nowTime    = $dateModel->gmtTimestamp();
         $nowString  = $dateModel->gmtDate('Y-m-d H:i:s');
 
-        $blockWindowSeconds   = 10 * 60;
-        $maxRequestsInWindow  = 3;
+        // BLOCK PER HOUR
+        $blockWindowSeconds = 60 * 60;
 
         if (!$postRequest->getId()) {
             $postRequest
                 ->setSourceIp($ip)
+                ->setUrl($uri)
                 ->setRequestsCount(1)
                 ->setUpdatedAt($nowString)
                 ->save();
 
             Mage::helper('lcb_security')->log(
-                sprintf('LCB_Security NEW: IP %s, count=1', $ip)
+                sprintf('LCB_Security NEW: IP %s, URL %s, count=1', $ip, $uri)
             );
             return;
         }
@@ -51,14 +80,16 @@ class LCB_Security_Model_Observer
 
         if ($diff >= $blockWindowSeconds) {
             $postRequest
+                ->setUrl($uri)
                 ->setRequestsCount(1)
                 ->setUpdatedAt($nowString)
                 ->save();
 
             Mage::helper('lcb_security')->log(
                 sprintf(
-                    'LCB_Security RESET: IP %s, lastUpdated=%s, diff=%ds',
+                    'LCB_Security RESET: IP %s, URL %s, lastUpdated=%s, diff=%ds',
                     $ip,
+                    $uri,
                     $lastUpdated,
                     $diff
                 )
@@ -74,11 +105,12 @@ class LCB_Security_Model_Observer
             ->setUpdatedAt($nowString)
             ->save();
 
-        if ($newCount >= $maxRequestsInWindow) {
+        if ($newCount > $maxRequestsInWindow) {
             Mage::helper('lcb_security')->log(
                 sprintf(
-                    'LCB_Security BLOCK: IP %s, count=%d (limit %d), lastUpdated=%s, diff=%ds',
+                    'LCB_Security BLOCK: IP %s, URL %s, count=%d (limit %d), lastUpdated=%s, diff=%ds',
                     $ip,
+                    $uri,
                     $newCount,
                     $maxRequestsInWindow,
                     $lastUpdated,
@@ -88,7 +120,7 @@ class LCB_Security_Model_Observer
 
             Mage::getSingleton('core/session')->addError(
                 Mage::helper('core')->__(
-                    'Too many requests from your IP. Please try again, after 10 minutes.'
+                    'Too many requests from your IP. Please try again, after some time.'
                 )
             );
 
@@ -109,8 +141,9 @@ class LCB_Security_Model_Observer
 
         Mage::helper('lcb_security')->log(
             sprintf(
-                'LCB_Security ALLOW: IP %s, count=%d/%d, lastUpdated=%s, diff=%ds',
+                'LCB_Security ALLOW: IP %s, URL %s, count=%d/%d, lastUpdated=%s, diff=%ds',
                 $ip,
+                $uri,
                 $newCount,
                 $maxRequestsInWindow,
                 $lastUpdated,

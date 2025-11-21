@@ -2,11 +2,16 @@
 <config>
     <modules>
         <LCB_Security>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </LCB_Security>
     </modules>
 
     <global>
+        <blocks>
+            <lcb_security>
+                <class>LCB_Security_Block</class>
+            </lcb_security>
+        </blocks>
 
         <helpers>
             <lcb_security>
@@ -25,6 +30,9 @@
                     <post_request>
                         <table>lcb_security_post_request</table>
                     </post_request>
+                    <rule>
+                        <table>lcb_security_rule</table>
+                    </rule>
                 </entities>
             </lcb_security_resource>
         </models>
@@ -66,4 +74,16 @@
             </controller_action_predispatch>
         </events>
     </frontend>
+
+    <admin>
+        <routers>
+            <lcb_security>
+                <use>admin</use>
+                <args>
+                    <module>LCB_Security</module>
+                    <frontName>lcb_security</frontName>
+                </args>
+            </lcb_security>
+        </routers>
+    </admin>
 </config>
