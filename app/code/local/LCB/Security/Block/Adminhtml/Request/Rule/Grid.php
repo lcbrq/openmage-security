@@ -1,11 +1,11 @@
 <?php
 
-class LCB_Security_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class LCB_Security_Block_Adminhtml_Request_Rule_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {
         parent::__construct();
-        $this->setId('lcbSecurityRuleGrid');
+        $this->setId('lcbSecurityRequestRuleGrid');
         $this->setDefaultSort('entity_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
@@ -13,7 +13,7 @@ class LCB_Security_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Block_Widget
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('lcb_security/rule')->getCollection();
+        $collection = Mage::getModel('lcb_security/request_rule')->getCollection();
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -29,9 +29,9 @@ class LCB_Security_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Block_Widget
             'index'  => 'entity_id',
         ));
 
-        $this->addColumn('url', array(
-            'header' => $helper->__('URL'),
-            'index'  => 'url',
+        $this->addColumn('path', array(
+            'header' => $helper->__('Path'),
+            'index'  => 'path',
         ));
 
         $this->addColumn('requests_per_hour', array(
@@ -43,6 +43,10 @@ class LCB_Security_Block_Adminhtml_Rule_Grid extends Mage_Adminhtml_Block_Widget
         return parent::_prepareColumns();
     }
 
+    /**
+     * @param Varien_Object $row
+     * @return string
+     */
     public function getRowUrl($row)
     {
         return $this->getUrl('*/*/edit', array('id' => $row->getId()));

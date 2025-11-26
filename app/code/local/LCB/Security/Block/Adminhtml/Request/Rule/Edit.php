@@ -1,12 +1,12 @@
 <?php
 
-class LCB_Security_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
+class LCB_Security_Block_Adminhtml_Request_Rule_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     public function __construct()
     {
         $this->_objectId   = 'id';
         $this->_blockGroup = 'lcb_security';
-        $this->_controller = 'adminhtml_rule';
+        $this->_controller = 'adminhtml_request_rule';
         parent::__construct();
 
         $this->_updateButton('save', 'label', Mage::helper('lcb_security')->__('Save Rule'));

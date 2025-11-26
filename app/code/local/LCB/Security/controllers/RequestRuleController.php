@@ -1,14 +1,14 @@
 <?php
 
-class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
+class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Action
 {
     public function indexAction()
     {
         $this->loadLayout();
-        $this->_setActiveMenu('system/security_rules');
+        $this->_setActiveMenu('system/lcb_security/request_rules');
         $this->_title($this->__('Security Rules'));
         $this->_addContent(
-            $this->getLayout()->createBlock('lcb_security/adminhtml_rule')
+            $this->getLayout()->createBlock('lcb_security/adminhtml_request_rule')
         );
         $this->renderLayout();
     }
@@ -21,7 +21,7 @@ class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
     public function editAction()
     {
         $id    = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('lcb_security/rule');
+        $model = Mage::getModel('lcb_security/request_rule');
 
         if ($id) {
             $model->load($id);
@@ -34,10 +34,10 @@ class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
         Mage::register('current_rule', $model);
 
         $this->loadLayout();
-        $this->_setActiveMenu('system/security_rules');
+        $this->_setActiveMenu('system/lcb_security/request_rules');
         $this->_title($this->__('Security Rules'));
         $this->_addContent(
-            $this->getLayout()->createBlock('lcb_security/adminhtml_rule_edit')
+            $this->getLayout()->createBlock('lcb_security/adminhtml_request_rule_edit')
         );
 
         $this->renderLayout();
@@ -55,8 +55,8 @@ class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
         }
 
         try {
-            /** @var LCB_Security_Model_Rule $model */
-            $model = Mage::getModel('lcb_security/rule')->load($id);
+            /** @var LCB_Security_Model_Request_Rule $model */
+            $model = Mage::getModel('lcb_security/request_rule')->load($id);
 
             if (!$model->getId()) {
                 Mage::getSingleton('adminhtml/session')->addError(
@@ -81,7 +81,7 @@ class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
     {
         if ($data = $this->getRequest()->getPost()) {
             /** @var LCB_Security_Model_Rule $model */
-            $model = Mage::getModel('lcb_security/rule');
+            $model = Mage::getModel('lcb_security/request_rule');
 
             $id = $this->getRequest()->getParam('id');
             if ($id) {
@@ -124,9 +124,12 @@ class LCB_Security_RuleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')
-            ->isAllowed('system/security_rules');
+            ->isAllowed('system/lcb_security/request_rules');
     }
 }

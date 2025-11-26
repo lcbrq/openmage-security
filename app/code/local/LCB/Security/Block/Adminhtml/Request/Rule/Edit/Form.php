@@ -1,6 +1,6 @@
 <?php
 
-class LCB_Security_Block_Adminhtml_Rule_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
+class LCB_Security_Block_Adminhtml_Request_Rule_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     protected function _prepareForm()
     {
@@ -27,10 +27,10 @@ class LCB_Security_Block_Adminhtml_Rule_Edit_Form extends Mage_Adminhtml_Block_W
             ));
         }
 
-        $fieldset->addField('url', 'text', array(
-            'name'     => 'url',
-            'label'    => Mage::helper('lcb_security')->__('URL'),
-            'title'    => Mage::helper('lcb_security')->__('URL'),
+        $fieldset->addField('path', 'text', array(
+            'name'     => 'path',
+            'label'    => Mage::helper('lcb_security')->__('Path'),
+            'title'    => Mage::helper('lcb_security')->__('Path'),
             'required' => true,
         ));
 
@@ -38,6 +38,7 @@ class LCB_Security_Block_Adminhtml_Rule_Edit_Form extends Mage_Adminhtml_Block_W
             'name'     => 'requests_per_hour',
             'label'    => Mage::helper('lcb_security')->__('Requests per hour'),
             'title'    => Mage::helper('lcb_security')->__('Requests per hour'),
+            'class'    => 'validate-digits',
             'required' => true,
         ));
 
