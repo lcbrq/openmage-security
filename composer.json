@@ -3,6 +3,19 @@
     "license": ["proprietary"],
     "type": "magento-module",
     "description": "Spam prevention for POST requests",
+    "keywords": ["composer-installer", "magento", "openmage", "mahocommerce"],
+    "authors": [
+        {
+            "name": "Tomasz Gregorczyk",
+            "email": "tomasz@silpion.com.pl",
+            "role": "Developer"
+        },
+        {
+            "name": "Kamil Sagan",
+            "email": "k.sagan@silpion.io",
+            "role": "Developer"
+        }
+    ],
     "extra": {
         "magento-root-dir": "test/"
     }

@@ -2,10 +2,15 @@
 
 class LCB_Security_Model_Observer
 {
+    private $defaultRequestsPerHour = 10;
+
+    /**
+     * @param Varien_Event_Observer $observer
+     * @return Mage_Core_Controller_Varien_Action
+     */
     public function checkPostFlood(Varien_Event_Observer $observer)
     {
-        $action = $observer->getEvent()->getControllerAction();
-        if (!$action) {
+        if (!$action = $observer->getEvent()->getControllerAction()) {
             return;
         }
 
@@ -14,86 +19,79 @@ class LCB_Security_Model_Observer
             return;
         }
 
-        $ip = Mage::helper('core/http')->getRemoteAddr();
-        $uri = $request->getRequestUri();
+        $ip  = Mage::helper('core/http')->getRemoteAddr();
+        $path = ltrim((string) $request->getPathInfo(), '/');
 
-        Mage::helper('lcb_security')->log(sprintf('LCB_Security checkPostFlood: POST from %s to %s', $ip, $uri));
+        /** @var LCB_Security_Model_Rule $rule */
+        $rule = Mage::getModel('lcb_security/request_rule')->load($path, 'path');
+        $requestsPerHour = $rule->getRequestsPerHour() ?? $this->defaultRequestsPerHour;
 
-        $postRequest = Mage::getModel('lcb_security/post_request')->load($ip, 'source_ip');
+        /** @var LCB_Security_Model_Request_Post $postRequest */
+        $postRequest = Mage::getModel('lcb_security/request_post')
+            ->getCollection()
+            ->addFieldToFilter('ip', $ip)
+            ->addFieldToFilter('path', $path)
+            ->getFirstItem();
 
         $dateModel   = Mage::getSingleton('core/date');
-        $nowTime    = $dateModel->gmtTimestamp();
-        $nowString  = $dateModel->gmtDate('Y-m-d H:i:s');
+        $date  = $dateModel->gmtDate('Y-m-d H:i:s');
+        $now   = $dateModel->gmtTimestamp();
 
-        $blockWindowSeconds = 10 * 60;
+        $requestsCount = (int) $postRequest->getCount();
 
-        if (!$postRequest->getId()) {
-            $postRequest
-                ->setSourceIp($ip)
-                ->setRequestsCount(1)
-                ->setUpdatedAt($nowString)
-                ->save();
-
-            Mage::helper('lcb_security')->log(sprintf('LCB_Security NEW: IP %s, count=1', $ip));
-            return;
-        }
-
-        $lastUpdated     = $postRequest->getUpdatedAt();
-        $lastUpdatedTime = $lastUpdated ? strtotime($lastUpdated) : 0;
-        $diff        = $nowTime - $lastUpdatedTime;
-
-        if ($diff < $blockWindowSeconds) {
-            $currentCount = (int) $postRequest->getRequestsCount();
-            $newCount     = $currentCount + 1;
-
-            $postRequest
-                ->setRequestsCount($newCount)
-                ->setUpdatedAt($nowString)
-                ->save();
-
-            Mage::helper('lcb_security')->log(sprintf(
-                'LCB_Security BLOCK: IP %s, count=%d, lastUpdated=%s, diff=%ds',
-                $ip,
-                $newCount,
-                $lastUpdated,
-                $diff
-            ));
-
-            Mage::getSingleton('core/session')->addError(
-                Mage::helper('core')->__(
-                    'Too many requests from your IP. Please try again, after 10 minutes.'
-                )
-            );
-
-            $referer = $request->getServer('HTTP_REFERER');
-            if (!$referer) {
-                $referer = Mage::getUrl('');
+        if ($createdAt = $postRequest->getCreatedAt()) {
+            if ($now - 3600 < strtotime($createdAt)) {
+                if ($requestsCount > $requestsPerHour) {
+                    return $this->throwTooManyRequestsException($action);
+                }
             }
-
-            $action->getResponse()->setRedirect($referer);
-
-            $action->setFlag(
-                '',
-                Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH,
-                true
-            );
-
-            return;
         }
 
         $postRequest
-            ->setRequestsCount(1)
-            ->setUpdatedAt($nowString)
-            ->save();
+            ->setIp($ip)
+            ->setPath($path)
+            ->setCount($requestsCount + 1)
+            ->setUpdatedAt($date);
 
+        if (!$postRequest->getCreatedAt()) {
+            $postRequest->setCreatedAt($date);
+        }
 
-        Mage::helper('lcb_security')->log(
-            sprintf(
-                'LCB_Security RESET: IP %s, lastUpdated=%s, diff=%ds',
-                $ip,
-                $lastUpdated,
-                $diff
+        try {
+            $postRequest->save();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+
+        return $action;
+    }
+
+    /**
+     * @param Mage_Core_Controller_Varien_Action $action
+     * @return Mage_Core_Controller_Varien_Action
+     */
+    private function throwTooManyRequestsException($action)
+    {
+        $request = $action->getRequest();
+
+        Mage::getSingleton('core/session')->addError(
+            Mage::helper('core')->__(
+                'Too many requests from your IP. Please try again, after some time.'
             )
         );
+
+        $referer = $request->getServer('HTTP_REFERER');
+        if (!$referer) {
+            $referer = Mage::getUrl('');
+        }
+
+        $action->getResponse()->setRedirect($referer);
+        $action->setFlag(
+            '',
+            Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH,
+            true
+        );
+
+        return $action;
     }
 }

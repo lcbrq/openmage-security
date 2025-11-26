@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <lcb_security>
+                    <title>Security</title>
+                    <sort_order>999</sort_order>
+                    <children>
+                        <request_rules module="lcb_security" translate="title">
+                            <title>Request Rules</title>
+                            <sort_order>1</sort_order>
+                            <action>lcb_security/requestRule/index</action>
+                        </request_rules>
+                    </children>
+                </lcb_security>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <lcb_security>
+                                <title>Security</title>
+                                <sort_order>1</sort_order>
+                                <children>
+                                    <security_rules module="lcb_security" translate="title">
+                                        <title>Request Rules</title>
+                                    </security_rules>
+                                </children>
+                            </lcb_security>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

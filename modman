@@ -1,2 +1,3 @@
 app/code/local/LCB/Security
 app/etc/modules/LCB_Security.xml
+app/locale/pl_PL/LCB_Security.csv

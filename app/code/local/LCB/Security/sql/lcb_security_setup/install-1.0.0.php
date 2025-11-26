@@ -5,12 +5,13 @@ $installer = $this;
 
 $installer->startSetup();
 
-$conn  = $installer->getConnection();
-$table = $installer->getTable('lcb_security_post_request');
+$connection = $installer->getConnection();
 
-if (!$conn->isTableExists($table)) {
-    $tableDefinition = $conn
-        ->newTable($table)
+$requestPostTable = $installer->getTable('lcb_security/request_post');
+
+if (!$connection->isTableExists($requestPostTable)) {
+    $requestPostTableDefinition = $connection
+        ->newTable($requestPostTable)
         ->addColumn(
             'entity_id',
             Varien_Db_Ddl_Table::TYPE_INTEGER,
@@ -24,23 +25,32 @@ if (!$conn->isTableExists($table)) {
             'ID'
         )
         ->addColumn(
-            'source_ip',
+            'ip',
             Varien_Db_Ddl_Table::TYPE_VARCHAR,
             45,
             array(
                 'nullable' => false,
             ),
-            'Source IP'
+            'IP'
         )
         ->addColumn(
-            'requests_count',
+            'path',
+            Varien_Db_Ddl_Table::TYPE_TEXT,
+            255,
+            array(
+                'nullable' => false,
+            ),
+            'Path'
+        )
+        ->addColumn(
+            'count',
             Varien_Db_Ddl_Table::TYPE_INTEGER,
             null,
             array(
                 'nullable' => false,
                 'default'  => 0,
             ),
-            'Requests Count'
+            'Count'
         )
         ->addColumn(
             'updated_at',
@@ -49,19 +59,98 @@ if (!$conn->isTableExists($table)) {
             array(
                 'nullable' => false,
             ),
-            'Last Update Time'
+            'Updated At'
+        )
+        ->addColumn(
+            'created_at',
+            Varien_Db_Ddl_Table::TYPE_DATETIME,
+            null,
+            array(
+                'nullable' => false,
+            ),
+            'Created At'
         )
         ->addIndex(
             $installer->getIdxName(
-                'lcb_security_post_request',
-                array('source_ip'),
+                'lcb_security_request_post',
+                array('ip'),
                 Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX
             ),
-            array('source_ip'),
+            array('ip'),
             array('type' => Varien_Db_Adapter_Interface::INDEX_TYPE_INDEX)
         );
 
-    $conn->createTable($tableDefinition);
+    $connection->createTable($requestPostTableDefinition);
 }
+
+$requestRule = $installer->getTable('lcb_security/request_rule');
+
+if (!$connection->isTableExists($requestRule)) {
+    $requestRuleTableDefinition = $connection
+        ->newTable($requestRule)
+        ->addColumn(
+            'entity_id',
+            Varien_Db_Ddl_Table::TYPE_INTEGER,
+            null,
+            array(
+                'identity' => true,
+                'unsigned' => true,
+                'nullable' => false,
+                'primary'  => true,
+            ),
+            'ID'
+        )
+        ->addColumn(
+            'path',
+            Varien_Db_Ddl_Table::TYPE_TEXT,
+            255,
+            array(
+                'nullable' => false,
+            ),
+            'Path'
+        )
+        ->addColumn(
+            'requests_per_hour',
+            Varien_Db_Ddl_Table::TYPE_INTEGER,
+            null,
+            array(
+                'unsigned' => true,
+                'nullable' => false,
+                'default'  => 10,
+            ),
+            'Requests per hour'
+        )
+        ->addColumn(
+            'created_at',
+            Varien_Db_Ddl_Table::TYPE_DATETIME,
+            null,
+            array(
+                'nullable' => true,
+            ),
+            'Created At'
+        )
+        ->addColumn(
+            'updated_at',
+            Varien_Db_Ddl_Table::TYPE_DATETIME,
+            null,
+            array(
+                'nullable' => true,
+            ),
+            'Updated At'
+        )
+        ->addIndex(
+            $installer->getIdxName(
+                'lcb_security/request_rule',
+                array('path'),
+                Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE
+            ),
+            array('path'),
+            array('type' => Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE)
+        )
+        ->setComment('LCB Security Request Rules');
+
+    $connection->createTable($requestRuleTableDefinition);
+}
+
 
 $installer->endSetup();

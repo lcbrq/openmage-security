@@ -5,15 +5,17 @@
             <version>1.0.0</version>
         </LCB_Security>
     </modules>
-
     <global>
-
+        <blocks>
+            <lcb_security>
+                <class>LCB_Security_Block</class>
+            </lcb_security>
+        </blocks>
         <helpers>
             <lcb_security>
                 <class>LCB_Security_Helper</class>
             </lcb_security>
         </helpers>
-
         <models>
             <lcb_security>
                 <class>LCB_Security_Model</class>
@@ -22,13 +24,15 @@
             <lcb_security_resource>
                 <class>LCB_Security_Model_Resource</class>
                 <entities>
-                    <post_request>
-                        <table>lcb_security_post_request</table>
-                    </post_request>
+                    <request_post>
+                        <table>lcb_security_request_post</table>
+                    </request_post>
+                    <request_rule>
+                        <table>lcb_security_request_rule</table>
+                    </request_rule>
                 </entities>
             </lcb_security_resource>
         </models>
-
         <resources>
             <lcb_security_setup>
                 <setup>
@@ -39,13 +43,11 @@
                     <use>core_setup</use>
                 </connection>
             </lcb_security_setup>
-
             <lcb_security_read>
                 <connection>
                     <use>core_read</use>
                 </connection>
             </lcb_security_read>
-
             <lcb_security_write>
                 <connection>
                     <use>core_write</use>
@@ -53,7 +55,6 @@
             </lcb_security_write>
         </resources>
     </global>
-
     <frontend>
         <events>
             <controller_action_predispatch>
@@ -66,4 +67,38 @@
             </controller_action_predispatch>
         </events>
     </frontend>
+    <admin>
+        <routers>
+            <lcb_security>
+                <use>admin</use>
+                <args>
+                    <module>LCB_Security</module>
+                    <frontName>lcb_security</frontName>
+                </args>
+            </lcb_security>
+        </routers>
+    </admin>
+    <adminhtml>
+        <translate>
+            <modules>
+                <LCB_Security>
+                    <files>
+                        <default>LCB_Security.csv</default>
+                    </files>
+                </LCB_Security>
+            </modules>
+        </translate>
+    </adminhtml>
+    <crontab>
+        <jobs>
+            <lcb_security_delete_old_requests>
+                <schedule>
+                    <cron_expr>0 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>lcb_security/cron::deleteOldRequests</model>
+                </run>
+            </lcb_security_delete_old_requests>
+        </jobs>
+    </crontab>
 </config>
