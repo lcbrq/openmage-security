@@ -19,6 +19,10 @@ class LCB_Security_Model_Observer
             return;
         }
 
+        if (!Mage::helper('lcb_security')->isRequestLimitEnabled()) {
+            return;
+        }
+
         $ip  = Mage::helper('core/http')->getRemoteAddr();
         $path = ltrim((string) $request->getPathInfo(), '/');
 

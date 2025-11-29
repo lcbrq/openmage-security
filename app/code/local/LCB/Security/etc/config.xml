@@ -101,4 +101,11 @@
             </lcb_security_delete_old_requests>
         </jobs>
     </crontab>
+    <default>
+        <lcb_security>
+            <request_limit>
+                <enabled>1</enabled>
+            </request_limit>
+        </lcb_security>
+    </default>
 </config>
