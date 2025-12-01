@@ -76,13 +76,30 @@ class LCB_Security_Model_Observer
      */
     private function throwTooManyRequestsException($action)
     {
-        $request = $action->getRequest();
+        $request  = $action->getRequest();
+        $response = $action->getResponse();
 
-        Mage::getSingleton('core/session')->addError(
-            Mage::helper('core')->__(
-                'Too many requests from your IP. Please try again, after some time.'
-            )
+        $message = Mage::helper('lcb_security')->__(
+            'Too many requests from your IP. Please try again, after some time.'
         );
+
+        if ($request->isXmlHttpRequest() || $request->getParam('isAjax')) {
+
+            $response
+                ->clearHeaders()
+                ->setHeader('Content-Type', 'application/json', true)
+                ->setHttpResponseCode(429)
+                ->setBody(Mage::helper('core')->jsonEncode(array(
+                    'success' => false,
+                    'error'   => true,
+                    'message' => $message,
+                )));
+
+            $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+            return;
+        }
+
+        Mage::getSingleton('core/session')->addError($message);
 
         $referer = $request->getServer('HTTP_REFERER');
         if (!$referer) {

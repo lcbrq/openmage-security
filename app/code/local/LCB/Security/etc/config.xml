@@ -66,6 +66,15 @@
                 </observers>
             </controller_action_predispatch>
         </events>
+        <translate>
+            <modules>
+                <LCB_Security>
+                    <files>
+                        <default>LCB_Security.csv</default>
+                    </files>
+                </LCB_Security>
+            </modules>
+        </translate>
     </frontend>
     <admin>
         <routers>
