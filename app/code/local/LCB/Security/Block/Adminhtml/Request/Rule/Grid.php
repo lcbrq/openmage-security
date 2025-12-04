@@ -9,6 +9,7 @@ class LCB_Security_Block_Adminhtml_Request_Rule_Grid extends Mage_Adminhtml_Bloc
         $this->setDefaultSort('entity_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+        $this->addExportType('*/*/exportCsv', Mage::helper('lcb_security')->__('CSV'));
     }
 
     protected function _prepareCollection()

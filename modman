@@ -1,3 +1,8 @@
 app/code/local/LCB/Security
 app/etc/modules/LCB_Security.xml
+app/locale/cs_CZ/LCB_Security.csv
+app/locale/en_US/LCB_Security.csv
+app/locale/hu_HU/LCB_Security.csv
 app/locale/pl_PL/LCB_Security.csv
+app/locale/ro_RO/LCB_Security.csv
+app/locale/sk_SK/LCB_Security.csv

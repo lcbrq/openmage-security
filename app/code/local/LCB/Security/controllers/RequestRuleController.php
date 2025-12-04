@@ -12,6 +12,14 @@ class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Actio
         );
         $this->renderLayout();
     }
+    public function exportCsvAction()
+    {
+        $fileName = 'security_request_rule.csv';
+        $grid = $this->getLayout()->createBlock('lcb_security/adminhtml_request_rule_grid');
+        $content = $grid->getCsv();
+        $content = str_replace(',', ';', $content);
+        $this->_prepareDownloadResponse($fileName, $content);
+    }
 
     public function newAction()
     {
