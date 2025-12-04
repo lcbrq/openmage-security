@@ -84,7 +84,6 @@ class LCB_Security_Model_Observer
         );
 
         if ($request->isXmlHttpRequest() || $request->getParam('isAjax')) {
-
             $response
                 ->clearHeaders()
                 ->setHeader('Content-Type', 'application/json', true)
