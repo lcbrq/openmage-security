@@ -87,7 +87,7 @@ class LCB_Security_Model_Observer
             $response
                 ->clearHeaders()
                 ->setHeader('Content-Type', 'application/json', true)
-                ->setHttpResponseCode(429)
+                ->setHttpResponseCode(200)
                 ->setBody(Mage::helper('core')->jsonEncode(array(
                     'success' => false,
                     'error'   => true,
