@@ -12,6 +12,6 @@ class LCB_Security_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isRequestLimitEnabled()
     {
-        return Mage::getStoreConfigFlag(self::XPATH_REQUEST_LIMIT_ENABLED, $storeId);
+        return Mage::getStoreConfigFlag(self::XPATH_REQUEST_LIMIT_ENABLED);
     }
 }
