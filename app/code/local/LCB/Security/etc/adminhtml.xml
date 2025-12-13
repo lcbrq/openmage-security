@@ -10,8 +10,13 @@
                         <request_rules module="lcb_security" translate="title">
                             <title>Request Rules</title>
                             <sort_order>1</sort_order>
-                            <action>lcb_security/requestRule/index</action>
+                            <action>lcb_security/requestRule</action>
                         </request_rules>
+                        <request_post module="lcb_security" translate="title">
+                            <title>Request Inspector</title>
+                            <sort_order>1</sort_order>
+                            <action>lcb_security/requestPost</action>
+                        </request_post>
                     </children>
                 </lcb_security>
             </children>
@@ -27,9 +32,12 @@
                                 <title>Security</title>
                                 <sort_order>1</sort_order>
                                 <children>
-                                    <security_rules module="lcb_security" translate="title">
+                                    <request_rules module="lcb_security" translate="title">
                                         <title>Request Rules</title>
-                                    </security_rules>
+                                    </request_rules>
+                                    <request_post module="lcb_security" translate="title">
+                                        <title>Request Inspector</title>
+                                    </request_post>
                                 </children>
                             </lcb_security>
                             <config>

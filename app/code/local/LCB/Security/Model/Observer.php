@@ -51,10 +51,17 @@ class LCB_Security_Model_Observer
             }
         }
 
+        $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+        $hasCaptcha = (bool) $request->getParam('g-recaptcha-response');
+        $hasTurnstile = (bool) $request->getParam('cf-turnstile-response');
+
         $postRequest
+            ->setCustomerId($customerId)
             ->setIp($ip)
             ->setPath($path)
             ->setCount($requestsCount + 1)
+            ->setRecaptcha($hasCaptcha)
+            ->setTurnstile($hasTurnstile)
             ->setUpdatedAt($date);
 
         if (!$postRequest->getCreatedAt()) {

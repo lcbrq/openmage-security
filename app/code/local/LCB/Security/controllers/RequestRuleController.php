@@ -2,6 +2,9 @@
 
 class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Action
 {
+    /**
+     * @inheritDoc
+     */
     public function indexAction()
     {
         $this->loadLayout();
@@ -12,6 +15,10 @@ class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Actio
         );
         $this->renderLayout();
     }
+
+    /**
+     * @inheritDoc
+     */
     public function exportCsvAction()
     {
         $fileName = 'security_request_rule.csv';
@@ -21,11 +28,17 @@ class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Actio
         $this->_prepareDownloadResponse($fileName, $content);
     }
 
+    /**
+     * @return void
+     */
     public function newAction()
     {
         $this->_forward('edit');
     }
 
+    /**
+     * @return void
+     */
     public function editAction()
     {
         $id    = $this->getRequest()->getParam('id');
@@ -51,6 +64,9 @@ class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Actio
         $this->renderLayout();
     }
 
+    /**
+     * @return void
+     */
     public function deleteAction()
     {
         $id = $this->getRequest()->getParam('id');
@@ -85,6 +101,9 @@ class LCB_Security_RequestRuleController extends Mage_Adminhtml_Controller_Actio
         }
     }
 
+    /**
+     * @return void
+     */
     public function saveAction()
     {
         if ($data = $this->getRequest()->getPost()) {
