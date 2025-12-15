@@ -41,6 +41,22 @@ class LCB_Security_Block_Adminhtml_Request_Rule_Grid extends Mage_Adminhtml_Bloc
             'width'  => '120px',
         ));
 
+        $this->addColumn('created_at', array(
+            'header'    => $helper->__('Created At'),
+            'align'     => 'left',
+            'width'     => '100px',
+            'type'      => 'datetime',
+            'index'     => 'created_at',
+        ));
+
+        $this->addColumn('updated_at', array(
+            'header'    => $helper->__('Updated At'),
+            'align'     => 'left',
+            'width'     => '100px',
+            'type'      => 'datetime',
+            'index'     => 'updated_at',
+        ));
+
         return parent::_prepareColumns();
     }
 

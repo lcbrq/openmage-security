@@ -24,7 +24,7 @@ class LCB_Security_Model_Observer
         }
 
         $ip  = Mage::helper('core/http')->getRemoteAddr();
-        $path = ltrim((string) $request->getPathInfo(), '/');
+        $path = rtrim(ltrim((string) $request->getPathInfo(), '/'), '/');
 
         /** @var LCB_Security_Model_Rule $rule */
         $rule = Mage::getModel('lcb_security/request_rule')->load($path, 'path');
@@ -52,8 +52,8 @@ class LCB_Security_Model_Observer
         }
 
         $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
-        $hasCaptcha = (bool) $request->getParam('g-recaptcha-response');
-        $hasTurnstile = (bool) $request->getParam('cf-turnstile-response');
+        $hasCaptcha = $request->getParam('g-recaptcha-response') ? 1 : 0;
+        $hasTurnstile = $request->getParam('cf-turnstile-response') ? 1 : 0;
 
         $postRequest
             ->setCustomerId($customerId)
