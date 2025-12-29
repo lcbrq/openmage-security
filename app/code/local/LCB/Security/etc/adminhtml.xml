@@ -17,6 +17,16 @@
                             <sort_order>1</sort_order>
                             <action>lcb_security/requestPost</action>
                         </request_post>
+                        <stopwords translate="title" module="lcb_security">
+                            <title>Stop Words</title>
+                            <action>lcb_security/stopword/index</action>
+                            <sort_order>10</sort_order>
+                        </stopwords>
+                        <rejected_requests translate="title" module="lcb_security">
+                            <title>Rejected Posts</title>
+                            <action>lcb_security/rejectedRequest/index</action>
+                            <sort_order>20</sort_order>
+                        </rejected_requests>
                     </children>
                 </lcb_security>
             </children>
@@ -38,6 +48,12 @@
                                     <request_post module="lcb_security" translate="title">
                                         <title>Request Inspector</title>
                                     </request_post>
+                                     <stopwords translate="title" module="lcb_security">
+                                        <title>Stop Words</title>
+                                    </stopwords>
+                                    <rejected_requests translate="title" module="lcb_security">
+                                        <title>Rejected Posts</title>
+                                    </rejected_requests>
                                 </children>
                             </lcb_security>
                             <config>

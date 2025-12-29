@@ -2,7 +2,7 @@
 <config>
     <modules>
         <LCB_Security>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </LCB_Security>
     </modules>
     <global>
@@ -30,6 +30,12 @@
                     <request_rule>
                         <table>lcb_security_request_rule</table>
                     </request_rule>
+                     <stopword>
+                        <table>lcb_security_request_stopword</table>
+                    </stopword>
+                    <rejectedRequest>
+                        <table>lcb_security_request_post_rejected</table>
+                    </rejectedRequest>
                 </entities>
             </lcb_security_resource>
         </models>
@@ -63,6 +69,10 @@
                         <class>lcb_security/observer</class>
                         <method>checkPostFlood</method>
                     </lcb_security_post_request_limiter>
+                     <lcb_security_stopword_block>
+                        <class>lcb_security/observer</class>
+                        <method>blockPostByStopwords</method>
+                    </lcb_security_stopword_block>
                 </observers>
             </controller_action_predispatch>
         </events>

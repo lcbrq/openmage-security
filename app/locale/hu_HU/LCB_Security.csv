@@ -1,3 +1,6 @@
 "Request Rules","Kérés szabályai"
 "Requests per hour","Óránkénti kérések"
 "Too many requests from your IP. Please try again, after some time.","Túl sok kérés érkezett az IP-címedről. Kérjük, próbáld újra később."
+"Stop Words","Blokkolt szavak"
+"Rejected Posts","Elutasított bejegyzések"
+"Your message was blocked by spam protection.","A spamvédelem blokkolta az üzenetedet."

@@ -121,4 +121,64 @@ class LCB_Security_Model_Observer
 
         return $action;
     }
+    public function blockPostByStopwords(Varien_Event_Observer $observer)
+    {
+        $controller = $observer->getEvent()->getControllerAction();
+        if (!$controller) {
+            return;
+        }
+
+        if ($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH)) {
+            return;
+        }
+
+        $request = $controller->getRequest();
+
+        if (!$request || !$request->isPost()) {
+            return;
+        }
+
+        if (Mage::app()->getStore()->isAdmin() || $request->getRouteName() === 'admin') {
+            return;
+        }
+
+        $raw  = (string)$request->getRawBody();
+        $post = (array)$request->getPost();
+        $text = $raw !== '' ? $raw : Zend_Json::encode($post);
+
+        $matched = Mage::getModel('lcb_security/stopword')->findMatchedWordInText($text);
+        if (!$matched) {
+            return;
+        }
+
+        try {
+            $payload = array(
+                'post' => $post,
+                'raw'  => $raw,
+            );
+
+            Mage::getModel('lcb_security/rejectedRequest')
+                ->setCreatedAt(now())
+                ->setRemoteAddr(Mage::helper('core/http')->getRemoteAddr())
+                ->setRequestUri((string)$request->getRequestUri())
+                ->setUserAgent((string)$request->getServer('HTTP_USER_AGENT'))
+                ->setMatchedWord((string)$matched)
+                ->setPostBody(Zend_Json::encode($payload))
+                ->save();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+
+        Mage::getSingleton('core/session')->addError(
+            Mage::helper('lcb_security')->__('Your message was blocked by spam protection.')
+        );
+
+        $referer = $request->getServer('HTTP_REFERER');
+        $target  = $referer ? $referer : Mage::getBaseUrl();
+
+        $controller->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+        $controller->getResponse()
+            ->setRedirect($target)
+            ->sendResponse();
+    }
 }
