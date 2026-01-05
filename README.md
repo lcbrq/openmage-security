@@ -2,6 +2,11 @@
 
 Simple security addon for OpenMage (Magento 1)
 
+# Changelog
+
+1.2.0 - Add stopwords and rejected requests model
+1.1.0 - Add turnstile and recaptcha check
+
 # Uninstall
 
 ```

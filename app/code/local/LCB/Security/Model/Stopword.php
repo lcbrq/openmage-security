@@ -6,13 +6,13 @@ class LCB_Security_Model_Stopword extends Mage_Core_Model_Abstract
     {
         $this->_init('lcb_security/stopword');
     }
+
+    /**
+     * @param string $text
+     * @return string|null
+     */
     public function findMatchedWordInText($text)
     {
-        $text = (string)$text;
-        if ($text === '') {
-            return null;
-        }
-
         $textLower = mb_strtolower($text, 'UTF-8');
 
         $words = $this->getCollection()
@@ -21,10 +21,7 @@ class LCB_Security_Model_Stopword extends Mage_Core_Model_Abstract
 
         foreach ($words as $word) {
             $word = trim((string)$word);
-            if ($word === '') {
-                continue;
-            }
-            if (mb_stripos($textLower, $word, 0, 'UTF-8') !== false) {
+            if ($word && mb_stripos($textLower, $word, 0, 'UTF-8') !== false) {
                 return $word;
             }
         }

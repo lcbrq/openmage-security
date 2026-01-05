@@ -12,11 +12,18 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
         );
         $this->renderLayout();
     }
+
+    /**
+     * @inheritDoc
+     */
     public function newAction()
     {
         $this->_forward('edit');
     }
 
+    /**
+     * @return void
+     */
     public function editAction()
     {
         $id = (int)$this->getRequest()->getParam('id');
@@ -40,6 +47,9 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    /**
+     * @return void
+     */
     public function saveAction()
     {
         if (!$this->getRequest()->isPost()) {
@@ -90,6 +100,9 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
         }
     }
 
+    /**
+     * @return void
+     */
     public function deleteAction()
     {
         $id = (int)$this->getRequest()->getParam('id');
@@ -115,6 +128,9 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
         return $this->_redirect('*/*/index');
     }
 
+    /**
+     * @return void
+     */
     public function massDeleteAction()
     {
         $ids = $this->getRequest()->getParam('ids');
@@ -148,6 +164,10 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
 
         return $this->_redirect('*/*/index');
     }
+
+    /**
+     * @inheritDoc
+     */
     public function exportCsvAction()
     {
         $fileName = 'security_stopwords.csv';
@@ -158,6 +178,9 @@ class LCB_Security_StopwordController extends Mage_Adminhtml_Controller_Action
         $this->_prepareDownloadResponse($fileName, $content);
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/lcb_security/stopwords');

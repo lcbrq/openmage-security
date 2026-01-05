@@ -121,9 +121,15 @@ class LCB_Security_Model_Observer
 
         return $action;
     }
+
+    /**
+     * @param Varien_Event_Observer $observer
+     * @return void
+     */
     public function blockPostByStopwords(Varien_Event_Observer $observer)
     {
         $controller = $observer->getEvent()->getControllerAction();
+
         if (!$controller) {
             return;
         }
@@ -142,11 +148,17 @@ class LCB_Security_Model_Observer
             return;
         }
 
-        $raw  = (string)$request->getRawBody();
-        $post = (array)$request->getPost();
+        $raw  = (string) $request->getRawBody();
+        $post = (array) $request->getPost();
+
         $text = $raw !== '' ? $raw : Zend_Json::encode($post);
 
+        if (!$text) {
+            return;
+        }
+
         $matched = Mage::getModel('lcb_security/stopword')->findMatchedWordInText($text);
+
         if (!$matched) {
             return;
         }

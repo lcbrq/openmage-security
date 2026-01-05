@@ -13,11 +13,17 @@ class LCB_Security_RejectedRequestController extends Mage_Adminhtml_Controller_A
         $this->renderLayout();
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function _isAllowed()
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/lcb_security/rejected_requests');
     }
 
+    /**
+     * @return void
+     */
     public function deleteAction()
     {
         $id = (int)$this->getRequest()->getParam('id');
@@ -43,6 +49,9 @@ class LCB_Security_RejectedRequestController extends Mage_Adminhtml_Controller_A
         return $this->_redirect('*/*/index');
     }
 
+    /**
+     * @return void
+     */
     public function massDeleteAction()
     {
         $ids = $this->getRequest()->getParam('ids');
@@ -76,6 +85,10 @@ class LCB_Security_RejectedRequestController extends Mage_Adminhtml_Controller_A
 
         return $this->_redirect('*/*/index');
     }
+
+    /**
+     * @inheritDoc
+     */
     public function exportCsvAction()
     {
         $fileName = 'security_rejected_posts.csv';
